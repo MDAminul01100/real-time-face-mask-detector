@@ -21,7 +21,7 @@ class DataProcessing:
                 image = load_img(img_path, target_size=(224, 224))
                 image = img_to_array(image)
                 image = preprocess_input(image)
-                print(img)
+                # print(img)
                 self.__data.append(image)
                 # self.__labels.append(category)
 
