@@ -12,7 +12,7 @@ class DataProcessing:
     __labels = []
 
     def __parseImagesIntoDatalist(self):
-        #self.__dataDirectory += r'\00000'
+        # self.__dataDirectory += r'\00000'
 
         for subdirectory in os.listdir(self.__dataDirectory):
             path = os.path.join(self.__dataDirectory, subdirectory)
