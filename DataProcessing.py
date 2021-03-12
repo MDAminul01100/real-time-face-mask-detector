@@ -5,28 +5,32 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 
 class DataProcessing:
-    def __init__(self, directory=None):
+    # subdirectories will be the categories like NO_MASK or IMFD or CMFD
+    def __init__(self, directory, categories):
         self.__dataDirectory = directory
+        self.__categories = categories
 
     __data = []
     __labels = []
 
-    def __parseImagesIntoDatalist(self):
-        # self.__dataDirectory += r'\00000'
+    def __parseImagesIntoDatalist(self, category):
+        # joining the directory and category to get the path of the subdirectory
+        directory = os.path.join(self.__dataDirectory, category)
 
-        for subdirectory in os.listdir(self.__dataDirectory):
-            path = os.path.join(self.__dataDirectory, subdirectory)
+        for subdirectory in os.listdir(directory):
+            path = os.path.join(directory, subdirectory)
             for img in os.listdir(path):
                 img_path = os.path.join(path, img)
                 image = load_img(img_path, target_size=(224, 224))
                 image = img_to_array(image)
                 image = preprocess_input(image)
-                # print(img)
+                print(img)
                 self.__data.append(image)
-                # self.__labels.append(category)
+                self.__labels.append(category)
 
     def getDataList(self):
-        self.__parseImagesIntoDatalist()
+        for category in self.__categories:
+            self.__parseImagesIntoDatalist(category)
         return self.__data
 
     def getLabelsList(self):
