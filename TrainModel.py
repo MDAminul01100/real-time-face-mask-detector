@@ -14,15 +14,12 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
-# from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-# from tensorflow.keras.preprocessing.image import img_to_array
-# from tensorflow.keras.preprocessing.image import load_img
-# from imutils import paths
-# import os
+from pathlib import Path
+import os
 
 
 class TrainModel:
-    __datasetDirectory = r'C:\Users\aminu\Documents\study materials (8th semester)\spl3\datasets'
+    __datasetDirectory = r'C:\Users\aminu\Documents\study materials (8th semester)\spl3\temp_dataset'
 
     # Correctly masked face Dataset - CMFD
     # Incorrectly masked face dataset - IMFD
@@ -52,7 +49,7 @@ class TrainModel:
 
     def __constructHeadModel(self, baseModel):
         # construct the head of the model that will be placed on top of the the base model
-        # by pooling, flattening and using dropout to avoid over-fitting of our model
+        # by pooling, flattening and using dropout to avoid over-fitting of the model
         headModel = baseModel.output
         headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
         headModel = Flatten(name="flatten")(headModel)
@@ -62,6 +59,7 @@ class TrainModel:
         numberOfLayers = len(self.__categories)
         headModel = Dense(numberOfLayers, activation="softmax")(headModel)
         return headModel
+
     def __plotTrainingLossAndAccuracy(self, H):
         N = self.__EPOCHS
         plt.style.use("ggplot")
@@ -77,6 +75,7 @@ class TrainModel:
         plt.savefig("resources/plot.png")
 
     def __trainModel(self):
+        print('Processing data... ... ...')
         data = self.__dataProcessor.getDataList()
         labels = self.__dataProcessor.getLabelsList()
 
@@ -87,7 +86,8 @@ class TrainModel:
         data = np.array(data, dtype="float32")
         labels = np.array(labels)
 
-        (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.20, stratify=labels, random_state=42)
+        (trainX, testX, trainY, testY) = train_test_split(data, labels,
+                                                          test_size=0.20, stratify=labels, random_state=42)
 
         # loading the MobileNetV2 and making sure the head fully connected layer sets are left off
         baseModel = MobileNetV2(weights="imagenet", include_top=False,
@@ -119,18 +119,28 @@ class TrainModel:
         # label with corresponding largest predicted probability
         indexOfPredictedLabels = np.argmax(indexOfPredictedLabels, axis=1)
 
-        # show a nicely formatted classification report
+        # show a good formatted classification report
         print(classification_report(testY.argmax(axis=1), indexOfPredictedLabels,
                                     target_names=LabelBinarizer().classes_))
 
         # saving the model to disk
-        mainModel.save("smart_face_mask_detector.model", save_format="h5")
-
+        modelDirectory = r'resources\smart_face_mask_detector.model'
+        mainModel.save(modelDirectory, save_format="h5")
 
         # plot the training loss and accuracy
         self.__plotTrainingLossAndAccuracy(H)
 
-        return "model"
+        return mainModel
 
     def getModel(self):
-        return self.__trainModel()
+        projectRootDirectory = Path(__file__).parent
+        modelDirectory = os.path.join(projectRootDirectory, 'resources')
+
+        # checking if the root directory already contains the trained model, if not, then train a new model
+        for file in os.listdir(modelDirectory):
+            if file.endswith('.model'):
+                print('model found in the directory... ...')
+                return file
+        else:
+            print('Model not found in the resource directory. Training a new model... ...')
+            return self.__trainModel()
