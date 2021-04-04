@@ -40,7 +40,7 @@ class FaceDetector:
             # greater than the minimum confidence
             if confidence < self.__MINIMUM_CONFIDENCE:
                 continue
-            print(confidence)
+            # print(confidence)
             # compute the (x, y)-coordinates of the bounding box for the
             # object
             face = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
@@ -56,5 +56,5 @@ class FaceDetector:
         return faceLocations
 
 
-    def getDetectedFaceImage(self, inputFrame):
+    def getDetectedFaces(self, inputFrame):
         return self.__detectFace(inputFrame)

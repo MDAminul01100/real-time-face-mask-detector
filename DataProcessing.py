@@ -12,6 +12,7 @@ class DataProcessing:
 
     __data = []
     __labels = []
+    tempCount = 0
 
     def __parseImagesIntoDatalist(self, category):
         # joining the directory and category to get the path of the subdirectory
@@ -25,12 +26,15 @@ class DataProcessing:
                 image = img_to_array(image)
                 image = preprocess_input(image)
                 print(img)
+                # print(image.ndim)
                 self.__data.append(image)
                 self.__labels.append(category)
+                self.tempCount += 1
 
     def getDataList(self):
         for category in self.__categories:
             self.__parseImagesIntoDatalist(category)
+        print('total image read: ', self.tempCount)
         return self.__data
 
     def getLabelsList(self):
